@@ -1,0 +1,70 @@
+<!DOCTYPE html> 
+<html>
+  <!-- Include the header layout file -->
+  <%- include('layouts/header'); -%>
+  <head>
+    <title>Leaderboard</title>
+    <!-- Include html2canvas library for capturing the leaderboard as an image -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.7/dist/html2canvas.min.js"></script>
+  </head>
+  <body>
+    <!-- Include the navbar layout file -->
+    <%- include('layouts/navbar'); -%>
+    <h1>Leaderboard</h1>
+    <div id="tableContainer">
+      <!-- Table used to display leaderboard data -->
+      <table id="leaderboardTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Wins</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <!-- Leaderboard rows will be dynamically added here -->
+          <% for(var i=0; i < players.length; i++) { %>
+            <tr>
+              <!-- Display rank, username, wins, and score for each player -->
+              <td><%= i + 1 %></td>
+              <td><%= players[i].username %></td>
+              <td><%= players[i].wins %></td>
+              <td><%= players[i].score %></td>
+            </tr>
+          <% } %>
+          <!-- Fill remaining rows if there are less than 5 players -->
+          <% for(var i=players.length; i < 5; i++) { %>
+            <tr>
+              <!-- Display placeholder values for empty rows -->
+              <td><%= i + 1 %></td>
+              <td><%= '---' %></td>
+              <td><%= '---' %></td>
+              <td><%= '---' %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    <!-- Button to save the leaderboard as an image -->
+    <button id="saveAsImageButton">Save as Image</button>
+    
+    <script>
+      // Event listener to capture the table as an image when the button is clicked
+      document
+        .getElementById("saveAsImageButton")
+        .addEventListener("click", function () {
+          // Use html2canvas library to capture the table
+          html2canvas(document.getElementById("tableContainer")).then(function (
+            canvas
+          ) {
+            // Create a link to download the captured image
+            var link = document.createElement("a");
+            link.download = "leaderboard.png";
+            link.href = canvas.toDataURL();
+            link.click();
+          });
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <!-- Include the header layout file -->
+  <%- include('layouts/header'); -%>
+  <head>
+    <title>Tips, Tutorials, and Fouls</title>
+    <!-- Include slick-carousel CSS files -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick-theme.css"
+    />
+  </head>
+  <body>
+    <!-- Include the navbar layout file -->
+    <%- include('layouts/navbar'); -%>
+    <!-- Main container -->
+    <div class="container">
+      <h1>Tips, Tutorials, and Fouls</h1>
+
+      <!-- Tips Section -->
+      <div class="section-container tips-container">
+        <h2>Tips</h2>
+        <!-- Text list of tips -->
+        <ul>
+          <li>
+            <strong>Tip 1:</strong> Always keep your focus on the fundamentals.
+          </li>
+          <li>
+            <strong>Tip 2:</strong> Practice consistently to improve your
+            technique.
+          </li>
+          <li>
+            <strong>Tip 3:</strong> Analyze your performance to identify areas
+            for improvement.
+          </li>
+          <li>
+            <strong>Tip 4:</strong> Mind the amount of power used when striking
+            the cue ball, be gentle.
+          </li>
+          <li>
+            <strong>Tip 5:</strong> If you can't sink a ball, try to position
+            one to set it up for your next turn.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Videos Div -->
+      <div class="section-container videos-container">
+        <h2>Videos</h2>
+        <!-- Video carousel div -->
+        <div class="video-carousel">
+          <div>
+            <iframe
+              src="https://www.youtube.com/embed/DZEP-7mRVsA?si=4AGA05fbOcuLDN81"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="Video 1"
+            ></iframe>
+          </div>
+
+          <div>
+            <iframe
+              src="https://www.youtube.com/embed/kAM6akLr2Fc?si=fR1vOQnvAokb_8yE"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="Video 2"
+            ></iframe>
+          </div>
+          <div>
+            <iframe
+              src="https://www.youtube.com/embed/XzReP5txdV8?si=Q4JjmwrEvR23AO9p"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="Video 3"
+            ></iframe>
+          </div>
+          <div>
+            <iframe
+              src="https://www.youtube.com/embed/KL0W45AkNMo?si=qnJRaJkjXUEG3k1Y"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="Video 4"
+            ></iframe>
+          </div>
+          <div>
+            <iframe
+              src="https://www.youtube.com/embed/_xig92Lo72M?si=l7uAXdmyE0clTsft"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="Video 5"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fouls Section -->
+      <div class="section-container fouls-container">
+        <h2>Fouls</h2>
+        <!-- List of fouls -->
+        <ul>
+          <li><strong>Cue Ball Sunk: </strong>Cue ball is pocketed</li>
+          <li>
+            <Strong>Wrong Ball: </Strong>Hitting opponents ball first with cue
+            ball
+          </li>
+          <li><strong>No Balls Hit: </strong>Failed to strike any balls</li>
+          <li><strong>Wrong Ball Sunk: </strong>Potting opponents ball</li>
+          <li>
+            <strong>Jump Shot: </strong>Ball is in the air and/or off the table
+          </li>
+          <li>
+            For other, less common fouls, refer to the full list outlined in
+            <!-- Link to a document with more fouls information -->
+            <a href="8BallPool.pdf" target="_blank">this document</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- jQuery (required for Slick Carousel) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Slick Carousel JS -->
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick.min.js"
+    ></script>
+    <!-- Script to initialize the Slick Carousel -->
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $(".video-carousel").slick({
+          slidesToShow: 3,
+          slidesToScroll: 1,
+          arrows: false,
+          autoplay: true,
+          autoplaySpeed: 2500,
+          dots: true,
+        });
+      });
+    </script>
+    
+  </body>
+</html>

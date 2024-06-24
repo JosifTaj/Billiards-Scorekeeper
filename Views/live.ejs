@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+  <!-- Header section of the HTML document -->
+  <header>
+    <title>Live Game</title>
+  </header>
+  <!-- Include external header -->
+  <%- include('layouts/header'); -%>
+  <body>
+    <%- include('layouts/navbar'); -%>
+    <h1>Live Game</h1>
+    <p>
+      Either login to save your game(s) or continue as is to play as guests.
+      <br />
+      Thank you for using our site!
+    </p>
+
+    <!-- Container for player controls -->
+    <div class="container">
+      <!-- Player one controls -->
+      <div class="player-container">
+        <button id="p1Login" onclick="openLoginPopup('p1')">Login</button>
+        <input type="text" placeholder="Player One" id="playerOneInput" />
+        <div>
+          <button onclick="increaseNumberp1()" id="p1Increase">+</button>
+          <span id="numberDisplay1">0</span>
+          <button onclick="decreaseNumberp1()" id="p1Decrease">-</button>
+        </div>
+        <button onclick="submitPlayerOne()" id="playerOneSubmit">Submit</button>
+        <select id="playerOneSelect">
+          <option value="Penalties">Penalties</option>
+          <option value="Cue Ball Sunk">Cue Ball Sunk</option>
+          <option value="Wrong Ball">Wrong Ball</option>
+          <option value="Jump Ball">Jump Ball</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <!-- Player two controls -->
+      <div class="player-container">
+        <button id="p2Login" onclick="openLoginPopup('p2')">Login</button>
+        <input type="text" placeholder="Player Two" id="playerTwoInput" />
+        <div>
+          <button onclick="increaseNumberp2()" id="p2Increase">+</button>
+          <span id="numberDisplay2">0</span>
+          <button onclick="decreaseNumberp2()" id="p2Decrease">-</button>
+        </div>
+        <button onclick="submitPlayerTwo()" id="playerTwoSubmit" disabled>
+          Submit
+        </button>
+        <select id="playerTwoSelect">
+          <option value="Penalties">Penalties</option>
+          <option value="Cue Ball Sunk">Cue Ball Sunk</option>
+          <option value="Wrong Ball">Wrong Ball</option>
+          <option value="Jump Ball">Jump Ball</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Login popup container -->
+    <div id="popupContainer" class="popup-container" style="display: none">
+      <div id="popupContent" class="popup-content">
+        <form id="loginForm">
+          <label for="username">Username:</label>
+          <input type="text" id="loginUsername" name="username" autocomplete="username" required />
+          <div></div>
+          <label for="password">Password:</label>
+          <input type="password" id="loginPassword" name="password" autocomplete="current-password" required />
+          <div></div>
+          <button type="button" onclick="tryLogin()">Login</button>
+          <button type="button" onclick="trySignup()">Signup</button>
+          <button type="button" onclick="closeLoginPopup()">Cancel</button>
+        </form>
+      </div>
+      <button onclick="playAnotherGame()" id="replayBtn" hidden>Play Another Game</button>
+    </div>
+    
+    <script>
+      // Initial variables
+      var currentPlayer = '';
+      var playerOneSubmitted = false;
+      var playerOneScore = 0;
+      var p1Fouls = [];
+      var p1Turns = 0;
+      var playerTwoSubmitted = false;
+      var playerTwoScore = 0;
+      var p2Fouls = [];
+      var p2Turns = 0;
+      var gameStarted = false;
+      var prevPlayerOneScore = 0;
+      var prevPlayerTwoScore = 0;
+
+      var playerOne = {
+        score: playerOneScore,
+        fouls: p1Fouls,
+        turns: p1Turns,
+      };
+
+      var playerTwo = {
+        score: playerTwoScore,
+        fouls: p2Fouls,
+        turns: p2Turns,
+      };
+
+      // Function to increase player one score
+      function increaseNumberp1() {
+        var numberDisplay = document.getElementById("numberDisplay1");
+        var currentNumber = parseInt(numberDisplay.textContent);
+        if ((playerTwoSubmitted || !gameStarted) && currentNumber < 10) {
+          playerOneScore++;
+          numberDisplay.textContent = playerOneScore;
+        }
+      }
+
+      // Function to increase player two score
+      function increaseNumberp2() {
+        var numberDisplay = document.getElementById("numberDisplay2");
+        var currentNumber = parseInt(numberDisplay.textContent);
+        if (playerOneSubmitted && currentNumber < 10) {
+          playerTwoScore++;
+          numberDisplay.textContent = playerTwoScore;
+        }
+      }
+
+      // Function to decrease player one score
+      function decreaseNumberp1() {
+        var numberDisplay = document.getElementById("numberDisplay1");
+        var currentNumber = parseInt(numberDisplay.textContent);
+        if (
+          (playerTwoSubmitted || !gameStarted) &&
+          currentNumber > 0 &&
+          currentNumber >= prevPlayerOneScore + 1
+        ) {
+          playerOneScore--;
+          numberDisplay.textContent = playerOneScore;
+        }
+      }
+
+      // Function to decrease player two score
+      function decreaseNumberp2() {
+        var numberDisplay = document.getElementById("numberDisplay2");
+        var currentNumber = parseInt(numberDisplay.textContent);
+        if (
+          playerOneSubmitted &&
+          currentNumber > 0 &&
+          currentNumber >= prevPlayerTwoScore + 1
+        ) {
+          playerTwoScore--;
+          numberDisplay.textContent = playerTwoScore;
+        }
+      }
+
+      // Function to open login popup
+      function openLoginPopup(player) {
+        currentPlayer = player;
+        document.getElementById('popupContainer').style.display = 'block';
+      }
+
+      // Function to close login popup
+      function closeLoginPopup() {
+        document.getElementById('popupContainer').style.display = 'none';
+      }
+
+      // Function to handle login (incomplete)
+      function tryLogin() {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            closeLoginPopup();
+            handleLoginSuccess(data);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      }
+
+      // Function to handle signup (incomplete)
+      function trySignup() {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        fetch('/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            closeLoginPopup();
+            handleLoginSuccess(data);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      }
+
+      // Function to handle successful login (incomplete)
+      function handleLoginSuccess(user) {
+        if (currentPlayer === 'p1') {
+          document.getElementById('playerOneInput').value = user.username;
+          document.getElementById('playerOneInput').readOnly = true;
+          document.getElementById('p1Login').style.display = 'none';
+        } else if (currentPlayer === 'p2') {
+          document.getElementById('playerTwoInput').value = user.username;
+          document.getElementById('playerTwoInput').readOnly = true;
+          document.getElementById('p2Login').style.display = 'none';
+        }
+      }
+
+      // Function to submit player one score
+      function submitPlayerOne() {
+        if (!playerTwoSubmitted && gameStarted) {
+          alert("Player Two must submit first.");
+          return;
+        }
+        var username = document.getElementById("playerOneInput").value;
+        var number = document.getElementById("numberDisplay1").textContent;
+        gameStarted = true;
+
+        var name1 = document.getElementById("playerOneInput");
+        var name2 = document.getElementById("playerTwoInput");
+
+        name1.setAttribute("readonly", "true");
+        name2.setAttribute("readonly", "true");
+
+        var option = document.getElementById("playerOneSelect").value;
+        if (option != "Penalties") {
+          playerOne.fouls.push(option);
+          p1Fouls.push(option);
+        }
+        playerOne.score = playerOneScore;
+        playerOne.turns++;
+        p1Turns++;
+
+        document.getElementById("playerOneSelect").selectedIndex = 0;
+
+        prevPlayerOneScore = playerOneScore;
+        playerOneSubmitted = true;
+        playerTwoSubmitted = false;
+        document.getElementById("playerTwoSubmit").removeAttribute("disabled");
+        document
+          .getElementById("playerOneSubmit")
+          .setAttribute("disabled", "true");
+        winCheck();
+      }
+
+      // Function to submit player two score
+      function submitPlayerTwo() {
+        if (!playerOneSubmitted) {
+          alert("Player One must submit first.");
+          return;
+        }
+        var username = document.getElementById("playerTwoInput").value;
+        var number = document.getElementById("numberDisplay2").textContent;
+
+        var option = document.getElementById("playerTwoSelect").value;
+        if (option != "Penalties") {
+          playerTwo.fouls.push(option);
+          p2Fouls.push(option);
+        }
+        playerTwo.score = playerTwoScore;
+        playerTwo.turns++;
+        p2Turns++;
+
+        document.getElementById("playerTwoSelect").selectedIndex = 0;
+
+        prevPlayerTwoScore = playerTwoScore;
+        playerTwoSubmitted = true;
+        playerOneSubmitted = false;
+        document.getElementById("playerOneSubmit").removeAttribute("disabled");
+        document
+          .getElementById("playerTwoSubmit")
+          .setAttribute("disabled", "true");
+        winCheck();
+      }
+
+      // Function to update user stats
+      function updateUserStats(username, score, fouls) {
+        fetch('/updateStats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, score, fouls })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            console.log('Stats updated successfully');
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      }
+
+      // Function to check for a winner
+      function winCheck() {
+        if (playerOneScore >= 10) {
+          showSummary("Player one wins!");
+          disableControls();
+          const username = document.getElementById("playerOneInput").value;
+          if (username) {
+            updateUserStats(username, playerOneScore, p1Fouls);
+          }
+        } else if (playerTwoScore >= 10) {
+          showSummary("Player two wins!");
+          disableControls();
+          const username = document.getElementById("playerTwoInput").value;
+          if (username) {
+            updateUserStats(username, playerTwoScore, p2Fouls);
+          }
+        }
+      }
+
+      // Function to disable game controls
+      function disableControls() {
+        // Disable buttons and select options
+        document.getElementById("p1Increase").disabled = true;
+        document.getElementById("p1Decrease").disabled = true;
+        document.getElementById("p2Increase").disabled = true;
+        document.getElementById("p2Decrease").disabled = true;
+        document.getElementById("p1Login").disabled = true;
+        document.getElementById("p2Login").disabled = true;
+        document.getElementById("playerOneSelect").disabled = true;
+        document.getElementById("playerTwoSelect").disabled = true;
+        document.getElementById("playerOneSubmit").disabled = true;
+        document.getElementById("playerTwoSubmit").disabled = true;
+      }
+
+      // Function to show the game summary
+      function showSummary(winnerMessage) {
+        var summary = "<h2>" + winnerMessage + "</h2>";
+
+        var usernameP1 = document.getElementById("playerOneInput").value;
+        summary += "<h3>Player One: " + usernameP1 + "</h3>";
+        summary += "<p>Score: " + playerOneScore + "</p>";
+        summary += "<p>Fouls: " + p1Fouls.length + "</p>";
+        summary += "<p>Turns: " + p1Turns + "</p>";
+
+        var usernameP2 = document.getElementById("playerTwoInput").value;
+        summary += "<h3>Player Two: " + usernameP2 + "</h3>";
+        summary += "<p>Score: " + playerTwoScore + "</p>";
+        summary += "<p>Fouls: " + p2Fouls.length + "</p>";
+        summary += "<p>Turns: " + p2Turns + "</p>";
+
+        var popupContainer = document.getElementById("popupContainer");
+        var popupContent = document.getElementById("popupContent");
+        popupContent.innerHTML = summary;
+        popupContainer.style.display = "block";
+
+        document.getElementById('replayBtn').removeAttribute('hidden');
+      }
+
+      // Function to start another game
+      function playAnotherGame() {
+        // Refresh the page to start another game
+        location.reload();
+      }
+    </script>
+  </body>
+</html>

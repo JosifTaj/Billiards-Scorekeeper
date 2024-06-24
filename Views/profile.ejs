@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Profile</title>
+    <!-- Include the header layout file -->
+    <%- include('layouts/header'); -%>
+  </head>
+  <body>
+    <!-- Include the navbar layout file -->
+    <%- include('layouts/navbar'); -%>
+    <div class="profile-wrapper">
+      <div id="profile-container" class="profile-container">
+        <!-- Profile picture section -->
+        <div class="profile-pic">
+          <img src="default-pic.png" alt="Profile Picture" id="profilePic" />
+        </div>
+        <!-- Form for login/signup -->
+        <div id="profileForm">
+          <div class="profile-info">
+            <label for="username">Username:</label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              placeholder="Username"
+              autocomplete="username"
+            />
+
+            <label for="password">Password:</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Password"
+              autocomplete="current-password"
+            />
+          </div>
+          <!-- Login button -->
+          <button type="button" id="loginBtn" onclick="tryLogin()">
+            Login
+          </button>
+          <!-- Signup button -->
+          <button type="button" id="signupBtn" onclick="return trySignup()">
+            Signup
+          </button>
+        </div>
+      </div>
+      <div id="userProfile" class="profile-container">
+        <!-- Profile picture and file input for changing the profile picture (incomplete)-->
+        <div class="profile-pic">
+          <img src="default-pic.png" alt="Profile Picture" id="profilePic" />
+          <input type="file" id="profilePicInput" />
+        </div>
+        <!-- Display user information -->
+        <div class="profile-info">
+          <p>Username: <span id="displayUsername"></span></p>
+          <p>Wins: <span id="displayWins"></span></p>
+          <p>Score: <span id="displayScore"></span></p>
+          <p>Fouls: <span id="displayFouls"></span></p>
+        </div>
+        <!-- Signout button -->
+        <button type="button" id="signoutBtn" onclick="signout()">
+          Signout
+        </button>
+      </div>
+    </div>
+    <script>
+      // JSON representation of all players
+      const allPlayers = <%- JSON.stringify(players) %>;
+
+      // Event listener to check for saved user in localStorage on page load
+      document.addEventListener('DOMContentLoaded', (event) => {
+        const savedUser = localStorage.getItem('loggedInUser');
+        console.log(JSON.parse(savedUser))
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          displayProfile(user);
+        }
+      });
+
+      // Function to handle login attempt. Compares with 'allPlayers' JSON
+      function tryLogin() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        for (const player of allPlayers) {
+          if (player.username === username) {
+            if (player.password === password) {
+              console.log('correct credentials');
+              localStorage.setItem('loggedInUser', JSON.stringify(player));
+              alert("Logged in successfully, welcome " + username)
+              displayProfile(player);
+              return;
+            }
+            alert('Incorrect password used! Please try again.')
+          }
+        }
+
+        console.log('incorrect credentials');
+        alert('Username not found! Please try again.')
+      }
+
+      // Function to handle signup attempt. Compares with 'allPlayers' JSON
+      async function trySignup() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (username.length < 5 || password.length < 5) {
+          return alert('Username and password must be greater than 5 characters!');
+        }
+
+        for (const player of allPlayers) {
+          if (player.username === username) {
+            return alert('Username is already taken! Please enter another.');
+          }
+        }
+        console.log("hmmmsmd")
+        // Error checks passed, create new user in database under this username and password
+        const response = await fetch(`/add-item`, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password
+          }),
+        }).catch(() => {});
+
+        const data = await response.json().catch(() => {});
+
+        if (data && data.success) {
+          alert(`Successfully signed up! Welcome, ${username}`);
+
+          // Cache the user and run the displayProfile() function
+          localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+          document.location.href = "/profile";
+        } else {
+          alert(`There was an error while trying to sign up! Error: ${data ? data.message || "none" : "none"}`);
+          document.location.href = "/profile";
+        }
+      }
+
+      // Function to display user profile information
+      function displayProfile(user) {
+        document.getElementById('profile-container').style.display = 'none';
+        document.getElementById('userProfile').style.display = 'block';
+        document.getElementById('displayUsername').innerText = user.username;
+        document.getElementById('displayWins').innerText = user.wins;
+        document.getElementById('displayScore').innerText = user.score;
+        if (user.fouls.length == 0) {
+          document.getElementById('displayFouls').innerText = 'None'
+        } else {
+          document.getElementById('displayFouls').innerText = user.fouls.join(', ');
+        }
+      }
+
+      // Function to handle signout
+      function signout() {
+        document.getElementById('profile-container').style.display = 'block';
+        document.getElementById('userProfile').style.display = 'none';
+        localStorage.removeItem('loggedInUser');
+      }
+    </script>
+  </body>
+</html>
